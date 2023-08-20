@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7-ELEVEN 查詢</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+
+    <div id="app">
+        <div class="container">
+            <div class="row">
+                <!-- title -->
+                <div class="col title">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/7-eleven_logo.svg/791px-7-eleven_logo.svg.png"
+                        alt="">
+                    <h1>7-ELEVEN 門市查詢系統</h1>
+
+                </div>
+            </div>
+            <div class="row">
+                <!-- 輸入框查詢 -->
+                <div class="col">
+                    <div class="input-group">
+                        <label for="">店名:</label>
+                        <input type="text" class="form-control input_inputbox" placeholder="請輸入門市名稱"
+                            aria-label="Recipient's username" aria-describedby="button-addon2" v-model="enterStoreName">
+                        <button class="btn btn-outline-secondary butotn_search" type="button" id="button-addon2"
+                            @click="searchStore"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="input-group">
+                        <label for="">店號:</label>
+                        <input type="text" class="form-control input_inputbox" placeholder="請輸入門市店號"
+                            aria-label="Recipient's username" aria-describedby="button-addon2" v-model="enterStoreNum">
+                        <button class="btn btn-outline-secondary butotn_search" type="button" id="button-addon2"
+                            @click="searchStore"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <!-- 選擇縣市 -->
+                <div class="col input_select">
+                    <label for="">縣市:</label>
+                    <select class="form-select" aria-label="Default select example" v-model="cityName"
+                        @change="changeCity">
+                        <option value="">請選擇</option>
+                        <option v-for="item in cityNameList" :key="item">{{item.cityName}}</option>
+                    </select>
+                </div>
+                <!-- 選擇鄉鎮 -->
+                <div class="col input_select">
+                    <label for="">鄉鎮:</label>
+                    <select class="form-select" aria-label="Default select example" v-model="areaName"
+                        @change="changeArea">
+                        <option value="">請選擇</option>
+                        <option v-for="item in areaList" :key="item">{{item.AreaName}}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <!-- 按鈕選擇區 -->
+                <label for="">請選擇門市:</label>
+                <div class="col  store_point" :class="{setCenter:storeName.length<1}">
+                    <button type="button" class="btn btn-secondary" :class="{active:item == storeInfo.poinName}"
+                        v-for="item in storeName" @click="changeStore(item)">{{item}}</button>
+                    <strong class="no_store" v-show="storeName.length<1">尚無門市資訊</strong>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div id="map"></div>
+                </div>
+                <div class="col">
+                    <div class="intrduce">
+                        <div class="text-center p-2">
+                            <h4>門市資訊</h4>
+                        </div>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <label for="">門市名稱:</label>
+                                <span>{{storeInfo.poinName}}</span>
+                            </li>
+                            <li class="list-group-item">
+                                <label for="">門市店號:</label>
+                                <span>{{storeInfo.poiid}}</span>
+                            </li>
+                            <li class="list-group-item">
+                                <label for="">地址:</label>
+                                <span>{{storeInfo.address}}</span>
+                            </li>
+                            <li class="list-group-item">
+                                <label for="">電話:</label>
+                                <span>{{storeInfo.tel}}</span>
+                            </li>
+                            <li class="list-group-item">
+                                <label for="">是否提供廁所:</label>
+                                <span>{{storeInfo.isBathRoom}}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- loading -->
+            <div class="d-flex justify-content-center loading" v-if="callApi">
+                <div class="spinner-border" role="status">
+                </div>
+                <span class="m-2">Loading...</span>
+            </div>
+        </div>
+        <!-- 燈箱 -->
+        <div class="modal fade" id="lightBox" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">錯誤訊息</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        查無相關門市資料
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/vue@next"></script>
+    <script>
+        Vue.createApp({
+            data() {
+                return {
+                    areaData: [],
+                    cityNameList: [],
+                    storeData: [],
+                    storeList: [],
+                    storeName: [],
+                    storeInfo: {},
+                    cityName: '',
+                    areaName: '',
+                    storeDetail: [],
+                    activeCity: '',
+                    activeStore: '',
+                    enterStoreName: '',
+                    enterStoreNum: '',
+                    map: null,
+                    myModal:null,
+                    callApi: false,
+                    localAPI: false
+                }
+            },
+            methods: {
+                callBackendAPI(url, callBack) {
+                    this.callApi = true
+                    return fetch(url)
+                        .then(res => res.json())
+                        .then(json => {
+                            if (callBack) {
+                                callBack(json)
+                            }
+                            this.callApi = false
+                        })
+                },
+                getAreaData() {
+                    let self = this
+                    this.callBackendAPI('https://run.mocky.io/v3/e4bc9909-e3df-44d2-b76b-b4696d66d93a', function (json) {
+                        self.areaData = json
+                        self.cityNameList = self.areaData.map(item => {
+                            return {
+                                cityName: item.CityName,
+                                engName: item.CityEngName
+                            }
+                        })
+                    })
+
+                },
+                getRemoteStoreData() {
+                    let self = this
+                    let url = ''
+                    const params = new URLSearchParams();
+
+                    if (this.localAPI) {
+                        url = `./Backend/store.json`
+
+                    } else {
+                        params.append('city', this.convertCity(this.cityName));
+                        params.append('area', this.areaName);
+                        url = `http://localhost:3000/store?${params}`
+                    }
+
+                    return this.callBackendAPI(url, function (json) {
+                        self.storeData = json
+                    })
+                },
+                initMap(item) {
+
+                    let x = 51.505
+                    let y = -0.09
+
+                    this.map = L.map('map').setView([x, y], 13);
+
+                    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
+                    }).addTo(this.map);
+
+                    this.marker = L.marker([x, y]).addTo(this.map);
+                    this.marker.bindPopup("歡迎使用!").openPopup();
+                },
+                setMap(item) {
+                    this.map.removeLayer(this.marker);
+                    this.marker = L.marker([item.y, item.x]).addTo(this.map);
+                    this.marker.bindPopup(`
+                    <img src=https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/7-eleven_logo.svg/791px-7-eleven_logo.svg.png>
+                    <p style='font-weight: bold;' class='text-center'>${item.poinName}門市</p>
+                    `).openPopup();
+                    this.map.panTo([item.y, item.x]);//讓marker保持置中
+                    this.storeInfo = item//更新門市資訊
+                },
+                changeCity() {
+                    let newList = this.cityNameList.filter(item => item.cityName == this.cityName)
+                    if (newList && newList.length) {
+                        let engNameSplit = newList[0].engName.split(' ')
+
+                        if (!engNameSplit || !engNameSplit.length) return
+                        this.activeCity = engNameSplit[0]
+                    }
+                    this.storeName = []
+                    this.activeStore = ""
+                },
+                changeArea() {
+                    if (!this.activeCity) return
+                    this.storeName = []
+                    this.storeDetail = []
+                    this.activeStore = ''
+
+                    if (this.localAPI) {
+                        let storeList = this.storeData[this.activeCity].stores
+                        storeList.forEach(item => {
+                            if (item.Address.includes(this.areaName)) {
+                                this.storeName.push(item.POIName)
+
+                                this.storeDetail.push({
+                                    address: item.Address,
+                                    x: item.X,
+                                    y: item.Y,
+                                    poiid: item.POIID,
+                                    poinName: item.POIName,
+                                    tel: item.Telno,
+                                    isBathRoom: item.isDining == "Y" ? "是" : "否"
+                                })
+                            }
+
+                        })
+                    } else {
+                        // 非localAPI時，會是選擇完鄉鎮之後才呼叫
+                        this.getRemoteStoreData().then(() => {
+                            this.storeData.forEach(item => {
+                                this.storeName.push(item.POIName)
+
+                                this.storeDetail.push({
+                                    address: item.Address,
+                                    x: item.X,
+                                    y: item.Y,
+                                    poiid: item.POIID,
+                                    poinName: item.POIName,
+                                    tel: item.Telno,
+                                    isBathRoom: item.isDining == "Y" ? "是" : "否"
+                                })
+                            })
+                        })
+                    }
+
+                },
+                changeStore(store) {
+                    let newData = this.storeDetail.find(item => item.poinName == store)
+                    this.setMap(newData)
+                },
+                convertCity(cityName) {
+                    let egName = this.cityNameList.find(item => item.cityName == cityName).engName
+                    if (egName) {
+                        egName = egName.split(' ')[0]
+                    }
+                    return egName
+                },
+                searchStore() {
+                    let self = this
+                    let newData = {}
+                    if (this.localAPI) {
+                        let columns = Object.keys(this.storeData)
+                        for (let i = 0; i < columns.length; i++) {
+                            let storeArr = this.storeData[columns[i]].stores
+                            for (let j = 0; j < storeArr.length; j++) {
+                                if (storeArr[j].POIName == this.enterStoreName || storeArr[j].POIID == this.enterStoreNum) {
+                                    let item = storeArr[j]
+                                    newData = {
+                                        address: item.Address,
+                                        x: item.X,
+                                        y: item.Y,
+                                        poiid: item.POIID,
+                                        poinName: item.POIName,
+                                        tel: item.Telno,
+                                        isBathRoom: item.isDining == "Y" ? "是" : "否"
+                                    }
+                                    this.setMap(newData)
+                                    break;
+                                }
+                                if (newData.poinName) {
+                                    break;
+                                }
+                            }
+                        }
+                        if (!newData.poinName) {
+                            const myModal = new bootstrap.Modal('#lightBox', {
+                                keyboard: false
+                            })
+                            myModal.show()
+                        }
+                    } else {
+                        const params = new URLSearchParams();
+                        params.append('storeName', this.enterStoreName);
+
+                        this.callBackendAPI(`http://localhost:3000/find?${params}`, function (json) {
+                            if (json.poinName) {
+                                self.setMap(json)
+                            } else {
+                                const myModal = new bootstrap.Modal('#lightBox', {
+                                    keyboard: false
+                                })
+                                myModal.show()
+                            }
+                        })
+                    }
+                }
+            },
+            computed: {
+                areaList() {
+                    let newList = this.areaData.find(item => item.CityName == this.cityName)
+                    if (newList) {
+                        this.areaName = ''
+                        return newList.AreaList
+                    }
+                    this.areaName = ''
+                    return []
+                },
+            },
+            mounted() {
+                this.getAreaData()
+                if (this.localAPI) {
+                    this.getRemoteStoreData()
+                }
+
+                this.initMap()
+            },
+        }).mount("#app")
+    </script>
+
+</body>
+
+</html>
