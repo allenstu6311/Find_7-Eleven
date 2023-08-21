@@ -22,7 +22,7 @@
             <div class="row">
                 <!-- title -->
                 <div class="col title">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/7-eleven_logo.svg/791px-7-eleven_logo.svg.png"
+                    <img src="./7-11.png"
                         alt="">
                     <h1>7-ELEVEN 門市查詢系統</h1>
 
@@ -36,7 +36,7 @@
                         <input type="text" class="form-control input_inputbox" placeholder="請輸入門市名稱"
                             aria-label="Recipient's username" aria-describedby="button-addon2" v-model="enterStoreName">
                         <button class="btn btn-outline-secondary butotn_search" type="button" id="button-addon2"
-                            @click="searchStore"><i class="fa-solid fa-magnifying-glass"></i></button>
+                            @click="searchStore('POIName',this.enterStoreName)"><i class="fa-solid fa-magnifying-glass"></i></button>
                     </div>
                 </div>
                 <div class="col">
@@ -45,7 +45,7 @@
                         <input type="text" class="form-control input_inputbox" placeholder="請輸入門市店號"
                             aria-label="Recipient's username" aria-describedby="button-addon2" v-model="enterStoreNum">
                         <button class="btn btn-outline-secondary butotn_search" type="button" id="button-addon2"
-                            @click="searchStore"><i class="fa-solid fa-magnifying-glass"></i></button>
+                            @click="searchStore('POIID',this.enterStoreNum)"><i class="fa-solid fa-magnifying-glass"></i></button>
                     </div>
                 </div>
             </div>
@@ -72,12 +72,36 @@
             <div class="row">
                 <!-- 按鈕選擇區 -->
                 <label for="">請選擇門市:</label>
-                <div class="col  store_point" :class="{setCenter:storeName.length<1}">
-                    <button type="button" class="btn btn-secondary" :class="{active:item == storeInfo.poinName}"
-                        v-for="item in storeName" @click="changeStore(item)">{{item}}</button>
-                    <strong class="no_store" v-show="storeName.length<1">尚無門市資訊</strong>
+                <div class="col  store_point" :class="{setCenter:storeDetailByShow.length<1}">
+                    <button type="button" class="btn btn-secondary"
+                        :class="{active:item.poinName == storeInfo.poinName}" v-for="item in storeDetailByShow"
+                        @click="setMap(item)">{{item.poinName}}</button>
+                    <strong class="no_store" v-show="storeDetailByShow.length<1">尚無門市資訊</strong>
+
                 </div>
+                <!-- 查詢筆數 -->
+                <div class="quantity">
+                    <span v-show="storeDetail.length>=1">符合條件的項目，共<span class="number">{{storeDetail.length}}</span>筆</span>
+                </div>
+                <!-- 分頁 -->
+                <nav aria-label="..." v-show="storeDetailByShow.length>=1" class="pagination-box">
+                    <ul class="pagination pagination-sm">
+                        <li class="page-item"><span class="page-link" @click="changePage('1')">Prev</span></li>
+                        <li class="page-item"><span class="page-link" v-show="currentNumByPagination>6" @click="currentNumByPagination = 1">1</span></li>
+                        <li class="page-item"><span class="page-link" v-show="currentNumByPagination>6">...</span></li>
+                        <li class="page-item" aria-current="page" v-for="(i,index) in pagination"
+                            :class="{activePage:currentNumByPagination==i}">
+                            <span class="page-link" @click="changePage('2',i)" v-show="showPagination(i)">{{i}}</span>
+                        </li>
+                        <li class="page-item"><span class="page-link"
+                                v-show="pagination-currentNumByPagination>5">...</span></li>
+                        <li class="page-item"><span class="page-link"
+                                v-show="pagination-currentNumByPagination>5" @click="currentNumByPagination = pagination">{{pagination}}</span></li>
+                        <li class="page-item"><span class="page-link" @click="changePage('3')">Next</span></li>
+                    </ul>
+                </nav>
             </div>
+            <!-- 門市資訊 -->
             <div class="row">
                 <div class="col">
                     <div id="map"></div>
@@ -105,8 +129,16 @@
                                 <span>{{storeInfo.tel}}</span>
                             </li>
                             <li class="list-group-item">
-                                <label for="">是否提供廁所:</label>
-                                <span>{{storeInfo.isBathRoom}}</span>
+                                <label for="">廁所:</label>
+                                <input type="checkbox" class="form-check-input" :checked="storeInfo.isLavatory == 'Y'" disabled>
+                            </li>
+                            <li class="list-group-item">
+                                <label for="">WIFI:</label>
+                                <input type="checkbox" class="form-check-input" :checked="storeInfo.is7WiFi == 'Y'" disabled>
+                            </li>
+                            <li class="list-group-item">
+                                <label for="">用餐區:</label>
+                                <input type="checkbox" class="form-check-input" :checked="storeInfo.isDining == 'Y'" disabled>
                             </li>
                         </ul>
                     </div>
@@ -153,7 +185,6 @@
                     cityNameList: [],
                     storeData: [],
                     storeList: [],
-                    storeName: [],
                     storeInfo: {},
                     cityName: '',
                     areaName: '',
@@ -162,10 +193,11 @@
                     activeStore: '',
                     enterStoreName: '',
                     enterStoreNum: '',
+                    currentNumByPagination: 1,
                     map: null,
-                    myModal:null,
+                    myModal: null,
                     callApi: false,
-                    localAPI: false
+                    localAPI: true
                 }
             },
             methods: {
@@ -212,7 +244,6 @@
                     })
                 },
                 initMap(item) {
-
                     let x = 51.505
                     let y = -0.09
 
@@ -230,12 +261,13 @@
                     this.map.removeLayer(this.marker);
                     this.marker = L.marker([item.y, item.x]).addTo(this.map);
                     this.marker.bindPopup(`
-                    <img src=https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/7-eleven_logo.svg/791px-7-eleven_logo.svg.png>
+                    <img src='./7-11.png'>
                     <p style='font-weight: bold;' class='text-center'>${item.poinName}門市</p>
                     `).openPopup();
                     this.map.panTo([item.y, item.x]);//讓marker保持置中
                     this.storeInfo = item//更新門市資訊
                 },
+                // 縣市下拉選單變更(取得activeCity)
                 changeCity() {
                     let newList = this.cityNameList.filter(item => item.cityName == this.cityName)
                     if (newList && newList.length) {
@@ -244,20 +276,18 @@
                         if (!engNameSplit || !engNameSplit.length) return
                         this.activeCity = engNameSplit[0]
                     }
-                    this.storeName = []
                     this.activeStore = ""
                 },
+                // 鄉鎮下拉選單變更(選擇完後直接進行篩選)
                 changeArea() {
                     if (!this.activeCity) return
-                    this.storeName = []
                     this.storeDetail = []
                     this.activeStore = ''
 
                     if (this.localAPI) {
                         let storeList = this.storeData[this.activeCity].stores
                         storeList.forEach(item => {
-                            if (item.Address.includes(this.areaName)) {
-                                this.storeName.push(item.POIName)
+                            if (this.areaName && item.Address.includes(this.areaName)) {
 
                                 this.storeDetail.push({
                                     address: item.Address,
@@ -266,7 +296,9 @@
                                     poiid: item.POIID,
                                     poinName: item.POIName,
                                     tel: item.Telno,
-                                    isBathRoom: item.isDining == "Y" ? "是" : "否"
+                                    isLavatory: item.isLavatory,
+                                    is7WiFi: item.is7WiFi,
+                                    isDining: item.isDining
                                 })
                             }
 
@@ -275,8 +307,6 @@
                         // 非localAPI時，會是選擇完鄉鎮之後才呼叫
                         this.getRemoteStoreData().then(() => {
                             this.storeData.forEach(item => {
-                                this.storeName.push(item.POIName)
-
                                 this.storeDetail.push({
                                     address: item.Address,
                                     x: item.X,
@@ -284,52 +314,68 @@
                                     poiid: item.POIID,
                                     poinName: item.POIName,
                                     tel: item.Telno,
-                                    isBathRoom: item.isDining == "Y" ? "是" : "否"
+                                    isLavatory: item.isLavatory,
+                                    is7WiFi: item.is7WiFi,
+                                    isDining: item.isDining
                                 })
                             })
                         })
                     }
 
                 },
-                changeStore(store) {
-                    let newData = this.storeDetail.find(item => item.poinName == store)
-                    this.setMap(newData)
-                },
-                convertCity(cityName) {
-                    let egName = this.cityNameList.find(item => item.cityName == cityName).engName
-                    if (egName) {
-                        egName = egName.split(' ')[0]
+                //切換頁面
+                changePage(param,i) {
+                    switch(param){
+                        case "1" :  
+                        if(this.currentNumByPagination > 1){
+                            this.currentNumByPagination -=1
+                        }
+                        break;
+                        case "2": this.currentNumByPagination = i;break;
+                        case "3" : 
+                        if(this.currentNumByPagination < this.pagination){
+                            this.currentNumByPagination +=1
+                        }
+                        break;
                     }
-                    return egName
                 },
-                searchStore() {
+                // 判斷要顯示的頁碼
+                showPagination(i) {
+                    if (i >= this.currentNumByPagination - 5 && i <= this.currentNumByPagination) {
+                        return true
+
+                    } else if (i <= this.currentNumByPagination + 5 && i >= this.currentNumByPagination) {
+                        return true
+                    }
+                    return false
+                },
+                //輸入框查詢
+                searchStore(key,param) {
                     let self = this
-                    let newData = {}
+                    this.storeDetail = []
                     if (this.localAPI) {
                         let columns = Object.keys(this.storeData)
                         for (let i = 0; i < columns.length; i++) {
                             let storeArr = this.storeData[columns[i]].stores
                             for (let j = 0; j < storeArr.length; j++) {
-                                if (storeArr[j].POIName == this.enterStoreName || storeArr[j].POIID == this.enterStoreNum) {
+                                storeArr[j][key] += ''//強制轉成字串
+                                if (storeArr[j][key].includes(param)) {
                                     let item = storeArr[j]
-                                    newData = {
+                                    this.storeDetail.push({
                                         address: item.Address,
                                         x: item.X,
                                         y: item.Y,
                                         poiid: item.POIID,
                                         poinName: item.POIName,
                                         tel: item.Telno,
-                                        isBathRoom: item.isDining == "Y" ? "是" : "否"
-                                    }
-                                    this.setMap(newData)
-                                    break;
-                                }
-                                if (newData.poinName) {
-                                    break;
+                                        isLavatory: item.isLavatory,
+                                        is7WiFi: item.is7WiFi,
+                                        isDining: item.isDining
+                                    })
                                 }
                             }
                         }
-                        if (!newData.poinName) {
+                        if (this.storeDetail.length < 1) {
                             const myModal = new bootstrap.Modal('#lightBox', {
                                 keyboard: false
                             })
@@ -350,7 +396,15 @@
                             }
                         })
                     }
-                }
+                },
+                convertCity(cityName) {
+                    let egName = this.cityNameList.find(item => item.cityName == cityName).engName
+                    if (egName) {
+                        egName = egName.split(' ')[0]
+                    }
+                    return egName
+                },
+
             },
             computed: {
                 areaList() {
@@ -362,6 +416,30 @@
                     this.areaName = ''
                     return []
                 },
+                pagination() {
+                    if (this.storeDetail.length > 72) {
+                        return Math.ceil(this.storeDetail.length / 72)
+                    }
+                    return 1
+                },
+                storeDetailByShow() {
+                    let newData = []
+                    if (this.storeDetail.length > 72) {
+                        for (let i = 0; i < this.storeDetail.length; i++) {
+                            if (i >= 72 * (this.currentNumByPagination - 1) && i < 72 * (this.currentNumByPagination - 1) + 72) {
+                                newData.push(this.storeDetail[i])
+                            }
+                        }
+                        return newData
+                    }
+
+                    return this.storeDetail
+                }
+            },
+            watch: {
+                storeDetail() {
+                    this.currentNumByPagination = 1
+                }
             },
             mounted() {
                 this.getAreaData()

@@ -68,10 +68,14 @@ img{
     margin: auto;
     min-height: 30vh;
     height: 100%;
+    padding-left: calc((100% - 94%) / 2);
 }
 .store_point button{
     width: 10%;
     margin:5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* 显示... */
 }
 
 /* 地圖 */
@@ -122,4 +126,44 @@ img{
     align-items: center;
     background-color: rgba(185, 185, 185, 0.5);
     z-index: 100;
+}
+/* checkbox */
+.form-check-input{
+    background-color: transparent;
+    border: 1px solid var(--bs-body-color);
+}
+/* 筆數 */
+.quantity{
+    text-align: center;
+    margin:20px 0;
+}
+.quantity .number{
+    color: var(--bs-danger);
+}
+/* 分頁 */
+.pagination{
+    --bs-pagination-hover-bg:#5c636a
+}
+
+.pagination-box{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.page-link{
+    background-color: transparent;
+    border: 1px solid #565e64;
+    color: #565e64;
+}
+.page-link:hover{
+    border-color: #565e64;
+    color: #fff;
+}
+.pagination-box .page-item{
+    cursor: pointer;
+}
+.activePage .page-link{
+    background-color: #6c757d !important;
+    z-index: 10;
+    color: #fff;
 }
