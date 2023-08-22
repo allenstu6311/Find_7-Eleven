@@ -1,81 +1,97 @@
-
 /* public */
-*{
+* {
     box-sizing: border-box;
 }
-body{
+
+body {
     background-color: var(--bs-warning-border-subtle);
 }
-label{
+
+label {
     font-weight: bold;
-    margin-right:10px;
+    margin-right: 10px;
     white-space: nowrap;
 }
-h4{
+
+h4 {
     font-weight: bold;
 }
-.active{
+
+.active {
     background-color: var(--bs-blue) !important;
 }
-img{
+
+img {
     width: 100%;
     height: 100%;
+    object-fit: cover;
 }
+
 .btn-outline-secondary {
     --bs-btn-hover-color: var(--bs-btn-border-color);
     --bs-btn-hover-bg: transparent;
 }
-.no_store{
+
+.no_store {
     font-size: 50px;
     opacity: .5;
 }
-.setCenter{
+
+.setCenter {
     display: flex;
     justify-content: center;
     align-items: center;
 }
+
 /* row */
-.row{
+.row {
     border: 2px dashed var(--bs-gray-700);
     border-radius: 5px;
     margin: 20px 0;
     padding: 10px;
 }
+
 /* 標題 */
-.title{
+.title {
     display: flex;
     align-items: center;
     justify-content: center;
 }
-.title img{
-    width: 10%;
+
+.title img {
+    /* width: 10%; */
+    width: 100px;
     height: 100%;
     margin-right: 20px;
 }
+
 /* 下拉選單 */
-.input_select{
+.input_select {
     display: flex;
     align-items: center;
 }
 
-.input_select .form-select{
-    background-color:transparent ;
+.input_select .form-select {
+    background-color: transparent;
     border: 1px solid var(--bs-body-color)
 }
 
 /* 按鈕 */
-.store_point{
+.store_point {
     margin: auto;
     min-height: 30vh;
     height: 100%;
-    padding-left: calc((100% - 94%) / 2);
+    padding-left: calc((100% - 92%) / 2);
 }
-.store_point button{
-    width: 10%;
-    margin:5px;
+
+.store_point button {
+    width: 28%;
+    margin: 5px;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* 显示... */
+    text-overflow: ellipsis;
+    /* 显示... */
+    max-width: 120px;
 }
 
 /* 地圖 */
@@ -90,31 +106,37 @@ img{
     background-color: transparent;
     border: 1px solid var(--bs-body-color);
 }
-.list-group .list-group-item{
+
+.list-group .list-group-item {
     background-color: transparent;
     border-bottom: 1px solid var(--bs-body-color)
 }
-.list-group .list-group-item:last-child{
+
+.list-group .list-group-item:last-child {
     border: none;
 }
+
 /* 輸入框 */
-.input-group{
+.input-group {
     align-items: center;
 }
-.butotn_search{
-    border-left: none ;
+
+.butotn_search {
+    border-left: none;
     border-top-right-radius: 0.375rem !important;
     border-bottom-right-radius: 0.375rem !important;
 }
-.input_inputbox{
+
+.input_inputbox {
     border-top-left-radius: 0.375rem !important;
     border-bottom-left-radius: 0.375rem !important;
     border: 1px solid var(--bs-body-color);
-    border-right:none;
+    border-right: none;
     background-color: transparent;
 }
+
 /* loading */
-.loading{
+.loading {
     position: fixed;
     width: 100%;
     height: 100%;
@@ -127,43 +149,69 @@ img{
     background-color: rgba(185, 185, 185, 0.5);
     z-index: 100;
 }
+
 /* checkbox */
-.form-check-input{
+.form-check-input {
     background-color: transparent;
     border: 1px solid var(--bs-body-color);
 }
+
 /* 筆數 */
-.quantity{
+.quantity {
     text-align: center;
-    margin:20px 0;
-}
-.quantity .number{
-    color: var(--bs-danger);
-}
-/* 分頁 */
-.pagination{
-    --bs-pagination-hover-bg:#5c636a
+    margin: 20px 0;
 }
 
-.pagination-box{
+.quantity .number {
+    color: var(--bs-danger);
+}
+
+/* 分頁 */
+.pagination {
+    --bs-pagination-hover-bg: #5c636a
+}
+
+.pagination-box {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
 }
-.page-link{
+
+.page-link {
     background-color: transparent;
     border: 1px solid #565e64;
     color: #565e64;
 }
-.page-link:hover{
+
+.page-link:hover {
     border-color: #565e64;
     color: #fff;
 }
-.pagination-box .page-item{
+
+.pagination-box .page-item {
     cursor: pointer;
 }
-.activePage .page-link{
+
+.activePage .page-link {
     background-color: #6c757d !important;
     z-index: 10;
     color: #fff;
+}
+
+.phone {
+    display: none;
+}
+
+@media screen and (max-width:768px) {
+    .computer {
+        display: none;
+    }
+
+    .phone {
+        display: flex;
+    }
+
+    .store_point {
+        padding-left: calc((100% - 88%) / 2);
+    }
 }

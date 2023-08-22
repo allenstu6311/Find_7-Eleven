@@ -22,36 +22,36 @@
             <div class="row">
                 <!-- title -->
                 <div class="col title">
-                    <img src="./7-11.png"
-                        alt="">
+                    <img src="./7-11.png" alt="">
                     <h1>7-ELEVEN 門市查詢系統</h1>
-
                 </div>
             </div>
             <div class="row">
                 <!-- 輸入框查詢 -->
-                <div class="col">
+                <div class="col-md-6 mb-2 mb-md-0">
                     <div class="input-group">
                         <label for="">店名:</label>
                         <input type="text" class="form-control input_inputbox" placeholder="請輸入門市名稱"
                             aria-label="Recipient's username" aria-describedby="button-addon2" v-model="enterStoreName">
                         <button class="btn btn-outline-secondary butotn_search" type="button" id="button-addon2"
-                            @click="searchStore('POIName',this.enterStoreName)"><i class="fa-solid fa-magnifying-glass"></i></button>
+                            @click="searchStore('POIName',this.enterStoreName)"><i
+                                class="fa-solid fa-magnifying-glass"></i></button>
                     </div>
                 </div>
-                <div class="col">
+                <div class="col-md-6">
                     <div class="input-group">
                         <label for="">店號:</label>
                         <input type="text" class="form-control input_inputbox" placeholder="請輸入門市店號"
                             aria-label="Recipient's username" aria-describedby="button-addon2" v-model="enterStoreNum">
                         <button class="btn btn-outline-secondary butotn_search" type="button" id="button-addon2"
-                            @click="searchStore('POIID',this.enterStoreNum)"><i class="fa-solid fa-magnifying-glass"></i></button>
+                            @click="searchStore('POIID',this.enterStoreNum)"><i
+                                class="fa-solid fa-magnifying-glass"></i></button>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <!-- 選擇縣市 -->
-                <div class="col input_select">
+                <div class="col-md-6 mb-2 mb-md-0 input_select">
                     <label for="">縣市:</label>
                     <select class="form-select" aria-label="Default select example" v-model="cityName"
                         @change="changeCity">
@@ -60,7 +60,7 @@
                     </select>
                 </div>
                 <!-- 選擇鄉鎮 -->
-                <div class="col input_select">
+                <div class="col-md-6 input_select">
                     <label for="">鄉鎮:</label>
                     <select class="form-select" aria-label="Default select example" v-model="areaName"
                         @change="changeArea">
@@ -77,36 +77,58 @@
                         :class="{active:item.poinName == storeInfo.poinName}" v-for="item in storeDetailByShow"
                         @click="setMap(item)">{{item.poinName}}</button>
                     <strong class="no_store" v-show="storeDetailByShow.length<1">尚無門市資訊</strong>
-
                 </div>
                 <!-- 查詢筆數 -->
                 <div class="quantity">
-                    <span v-show="storeDetail.length>=1">符合條件的項目，共<span class="number">{{storeDetail.length}}</span>筆</span>
+                    <span v-show="storeDetail.length>=1">符合條件的項目，共<span
+                            class="number">{{storeDetail.length}}</span>筆</span>
                 </div>
-                <!-- 分頁 -->
-                <nav aria-label="..." v-show="storeDetailByShow.length>=1" class="pagination-box">
+                <!-- 分頁(電腦版) -->
+                <nav aria-label="..." v-show="storeDetailByShow.length>=1" class="pagination-box computer">
                     <ul class="pagination pagination-sm">
                         <li class="page-item"><span class="page-link" @click="changePage('1')">Prev</span></li>
-                        <li class="page-item"><span class="page-link" v-show="currentNumByPagination>6" @click="currentNumByPagination = 1">1</span></li>
+                        <li class="page-item"><span class="page-link" v-show="currentNumByPagination>6"
+                                @click="currentNumByPagination = 1">1</span></li>
                         <li class="page-item"><span class="page-link" v-show="currentNumByPagination>6">...</span></li>
                         <li class="page-item" aria-current="page" v-for="(i,index) in pagination"
                             :class="{activePage:currentNumByPagination==i}">
-                            <span class="page-link" @click="changePage('2',i)" v-show="showPagination(i)">{{i}}</span>
+                            <span class="page-link" @click="changePage('2',i)"
+                                v-show="showPagination(i,6,4)">{{i}}</span>
                         </li>
                         <li class="page-item"><span class="page-link"
                                 v-show="pagination-currentNumByPagination>5">...</span></li>
+                        <li class="page-item"><span class="page-link" v-show="pagination-currentNumByPagination>5"
+                                @click="currentNumByPagination = pagination">{{pagination}}</span></li>
+                        <li class="page-item"><span class="page-link" @click="changePage('3')">Next</span></li>
+                    </ul>
+                </nav>
+                <!-- 分頁(手機版) -->
+                <nav aria-label="..." v-show="storeDetailByShow.length>=1" class="pagination-box phone">
+                    <ul class="pagination pagination-sm">
+                        <li class="page-item"><span class="page-link" @click="changePage('1')">Prev</span></li>
+                        <li class="page-item"><span class="page-link" v-show="currentNumByPagination>3"
+                                @click="currentNumByPagination = 1">1</span></li>
+                        <li class="page-item"><span class="page-link" v-show="currentNumByPagination>3">...</span></li>
+                        <li class="page-item" aria-current="page" v-for="(i,index) in pagination"
+                            :class="{activePage:currentNumByPagination==i}">
+                            <span class="page-link" @click="changePage('2',i)"
+                                v-show="showPagination(i,3,2)">{{i}}</span>
+                        </li>
                         <li class="page-item"><span class="page-link"
-                                v-show="pagination-currentNumByPagination>5" @click="currentNumByPagination = pagination">{{pagination}}</span></li>
+                                v-show="pagination-currentNumByPagination>5">...</span></li>
+                        <li class="page-item"><span class="page-link" v-show="pagination-currentNumByPagination>2"
+                                @click="currentNumByPagination = pagination">{{pagination}}</span></li>
                         <li class="page-item"><span class="page-link" @click="changePage('3')">Next</span></li>
                     </ul>
                 </nav>
             </div>
             <!-- 門市資訊 -->
             <div class="row">
-                <div class="col">
+                <!-- 地圖 -->
+                <div class="col-md-6 mb-2 mb-md-0">
                     <div id="map"></div>
                 </div>
-                <div class="col">
+                <div class="col-md-6">
                     <div class="intrduce">
                         <div class="text-center p-2">
                             <h4>門市資訊</h4>
@@ -130,15 +152,18 @@
                             </li>
                             <li class="list-group-item">
                                 <label for="">廁所:</label>
-                                <input type="checkbox" class="form-check-input" :checked="storeInfo.isLavatory == 'Y'" disabled>
+                                <input type="checkbox" class="form-check-input" :checked="storeInfo.isLavatory == 'Y'"
+                                    disabled>
                             </li>
                             <li class="list-group-item">
                                 <label for="">WIFI:</label>
-                                <input type="checkbox" class="form-check-input" :checked="storeInfo.is7WiFi == 'Y'" disabled>
+                                <input type="checkbox" class="form-check-input" :checked="storeInfo.is7WiFi == 'Y'"
+                                    disabled>
                             </li>
                             <li class="list-group-item">
                                 <label for="">用餐區:</label>
-                                <input type="checkbox" class="form-check-input" :checked="storeInfo.isDining == 'Y'" disabled>
+                                <input type="checkbox" class="form-check-input" :checked="storeInfo.isDining == 'Y'"
+                                    disabled>
                             </li>
                         </ul>
                     </div>
@@ -324,34 +349,50 @@
 
                 },
                 //切換頁面
-                changePage(param,i) {
-                    switch(param){
-                        case "1" :  
-                        if(this.currentNumByPagination > 1){
-                            this.currentNumByPagination -=1
-                        }
-                        break;
-                        case "2": this.currentNumByPagination = i;break;
-                        case "3" : 
-                        if(this.currentNumByPagination < this.pagination){
-                            this.currentNumByPagination +=1
-                        }
-                        break;
+                changePage(param, i) {
+                    switch (param) {
+                        case "1":
+                            if (this.currentNumByPagination > 1) {
+                                this.currentNumByPagination -= 1
+                            }
+                            break;
+                        case "2": this.currentNumByPagination = i; break;
+                        case "3":
+                            if (this.currentNumByPagination < this.pagination) {
+                                this.currentNumByPagination += 1
+                            }
+                            break;
                     }
                 },
                 // 判斷要顯示的頁碼
-                showPagination(i) {
-                    if (i >= this.currentNumByPagination - 5 && i <= this.currentNumByPagination) {
+                showPagination(i,num1,num2) {
+                    if (this.currentNumByPagination <= num1 && i <= num1+1) {
                         return true
 
-                    } else if (i <= this.currentNumByPagination + 5 && i >= this.currentNumByPagination) {
-                        return true
+                    } else if (this.currentNumByPagination > num1) {
+
+                        if (i >= this.currentNumByPagination - num2 && i <= this.currentNumByPagination) {
+                            return true
+
+                        } else if (i < this.currentNumByPagination + num2 && i >= this.currentNumByPagination) {
+                            return true
+                        }
                     }
                     return false
+
                 },
                 //輸入框查詢
-                searchStore(key,param) {
+                searchStore(key, param) {
                     let self = this
+                    const myModal = new bootstrap.Modal('#lightBox', {
+                        keyboard: false
+                    })
+
+                    if (!param) {
+                        myModal.show()
+                        return
+                    }
+
                     this.storeDetail = []
                     if (this.localAPI) {
                         let columns = Object.keys(this.storeData)
@@ -359,6 +400,9 @@
                             let storeArr = this.storeData[columns[i]].stores
                             for (let j = 0; j < storeArr.length; j++) {
                                 storeArr[j][key] += ''//強制轉成字串
+                                console.log(param)
+
+
                                 if (storeArr[j][key].includes(param)) {
                                     let item = storeArr[j]
                                     this.storeDetail.push({
@@ -376,9 +420,6 @@
                             }
                         }
                         if (this.storeDetail.length < 1) {
-                            const myModal = new bootstrap.Modal('#lightBox', {
-                                keyboard: false
-                            })
                             myModal.show()
                         }
                     } else {
