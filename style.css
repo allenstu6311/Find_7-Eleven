@@ -81,7 +81,8 @@ img {
     margin: auto;
     min-height: 30vh;
     height: 100%;
-    padding-left: calc((100% - 92%) / 2);
+    display: flex;
+    /* padding-left: calc((100% - 92%) / 2); */
 }
 
 .store_point button {
@@ -92,6 +93,10 @@ img {
     text-overflow: ellipsis;
     /* 显示... */
     max-width: 120px;
+}
+.btn_group{
+    display: inline-block;
+    margin: auto;
 }
 
 /* 地圖 */

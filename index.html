@@ -73,9 +73,11 @@
                 <!-- 按鈕選擇區 -->
                 <label for="">請選擇門市:</label>
                 <div class="col  store_point" :class="{setCenter:storeDetailByShow.length<1}">
-                    <button type="button" class="btn btn-secondary"
+                    <div class="btn_group" v-show="storeDetailByShow.length >= 1">
+                        <button type="button" class="btn btn-secondary"
                         :class="{active:item.poinName == storeInfo.poinName}" v-for="item in storeDetailByShow"
                         @click="setMap(item)">{{item.poinName}}</button>
+                    </div>
                     <strong class="no_store" v-show="storeDetailByShow.length<1">尚無門市資訊</strong>
                 </div>
                 <!-- 查詢筆數 -->
