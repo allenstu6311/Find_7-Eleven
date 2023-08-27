@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./taiwan.css">
+</head>
+
+<body>
+    <div id="app">
+        <taiwan @update-city="updateCity"></taiwan>
+    </div>
+
+
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="./taiwan.js"></script>
+    <script>
+
+        const app = Vue.createApp({
+            data() {
+                return {
+
+                }
+            },
+            methods: {
+                updateCity(path){
+                    console.log("父層",path)
+                }
+            },
+            mounted() {
+            },
+
+        })
+
+        app.component("taiwan", taiwanElement);
+        app.mount("#app")
+
+    </script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,18 @@
+svg{
+    height: 100vh;
+}
+
+path{
+    transition: 0.5s;
+    cursor: pointer;
+}
+
+path:hover{
+    fill:#B99362 ;
+    /* transform: translate(-5px,-5px) */
+}
+
+.test{
+    display: block;
+    width: 200px;
+}
