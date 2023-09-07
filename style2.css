@@ -3,6 +3,10 @@
     box-sizing: border-box;
 }
 
+#app {
+    position: relative;
+}
+
 body {
     background-color: var(--bs-warning-border-subtle);
 }
@@ -11,6 +15,10 @@ label {
     font-weight: bold;
     margin-right: 10px;
     white-space: nowrap;
+}
+
+.inputArea label {
+    margin-bottom: 10px;
 }
 
 h4 {
@@ -66,12 +74,16 @@ img {
 }
 
 /* 下拉選單 */
-.row:has(.input_select){
-    align-items: center;
-}
-.input_select {
-    display: flex;
-    align-items: center;
+.input_select {}
+
+.input_select button {
+    width: 28%;
+    margin: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* 显示... */
+    max-width: 120px;
 }
 
 .input_select .form-select {
@@ -79,24 +91,27 @@ img {
     border: 1px solid var(--bs-body-color)
 }
 
-/* 按鈕 */
+/* 按鈕  門市*/
 .store_point {
     margin: auto;
     min-height: 30vh;
     height: 100%;
     /* padding-left: calc((100% - 92%) / 2); */
 }
-.btn_group{
+
+.btn_group {
     width: 95%;
     margin: auto;
 }
+
 
 .store_point button {
     width: 28%;
     margin: 5px;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* 显示... */
+    text-overflow: ellipsis;
+    /* 显示... */
     max-width: 120px;
 }
 
@@ -220,5 +235,58 @@ img {
 
     .store_point {
         padding-left: calc((100% - 88%) / 2);
+    }
+
+    .no_store {
+        font-size: 30px;
+    }
+}
+
+/* 返回按鈕*/
+.go-back {
+    position: absolute;
+    top: 93%;
+    right: calc((100% - 95%) / 2);
+    ;
+    /* bottom: -75%; */
+    display: inline-block;
+    border-radius: 50px;
+    overflow: hidden;
+    margin: auto;
+    opacity: 0;
+    transition: .5s;
+}
+
+.go-back button {
+    text-align: center;
+    width: 80px;
+    height: 150px;
+    cursor: pointer;
+    font-size: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.go-back .arrow {
+    font-size: 40px;
+}
+
+.go-back button:hover .arrow {
+    animation-name: arrow-move;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+}
+
+@keyframes arrow-move {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(-10px);
     }
 }

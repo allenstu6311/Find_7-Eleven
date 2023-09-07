@@ -1,5 +1,7 @@
 svg{
-    height: 100vh;
+    width: 100%;
+    height: 60vh;
+    outline: none;
 }
 
 path{
@@ -12,7 +14,7 @@ path:hover{
     /* transform: translate(-5px,-5px) */
 }
 
-.test{
-    display: block;
-    width: 200px;
+.custom-tooltip{
+    outline: none;
 }
+
