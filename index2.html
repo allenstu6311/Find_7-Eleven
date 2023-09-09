@@ -83,20 +83,15 @@
                     </div>
                     <strong class="no_store" v-show="storeDetailByShow.length<1">尚無門市資訊</strong>
                 </div>
-                <!-- 查詢筆數 -->
-                <div class="quantity">
-                    <span v-show="storeDetail.length>=1">符合條件的項目，共<span
-                            class="number">{{storeDetail.length}}</span>筆</span>
-                </div>
                 <!-- 分頁(電腦版) -->
-                <page-nation class-name="computer" v-show="storeDetailByShow.length>=1" :pagination-num="pagination"
-                    :current-num="currentNumByPagination" @get-current-num="getCurrentNum" :show-range1="6"
-                    :show-range2="4"></page-nation>
+                <page-nation class-name="computer" v-show="storeDetailByShow.length>=1" @get-current-num="getCurrentNum"
+                    @update-data="updateData" :data="storeDetail" :current-num="currentNumByPagination" :start-page="7"
+                    :page-neighborhood="4" :show-range="72" :page-count="true"></page-nation>
 
                 <!-- 分頁(手機版) -->
-                <page-nation  class-name="phone" v-show="storeDetailByShow.length>=1" :pagination-num="pagination"
-                    :current-num="currentNumByPagination" @get-current-num="getCurrentNum" :show-range1="3"
-                    :show-range2="1"></page-nation>
+                <page-nation class-name="phone" v-show="storeDetailByShow.length>=1" @get-current-num="getCurrentNum"
+                    @update-data="updateData" :data="storeDetail" :current-num="currentNumByPagination" :start-page="3"
+                    :page-neighborhood="1" :show-range="72" :page-count="true"></page-nation>
             </div>
             <!-- 門市資訊 -->
             <div class="row">
@@ -195,23 +190,22 @@
         const app = Vue.createApp({
             data() {
                 return {
-                    areaData: [],
-                    cityNameList: [],
                     storeData: [],
-                    storeList: [],
+                    storeDetailByShow: [],
+                    storeDetail: [],
                     storeInfo: {},
                     cityName: '',
+                    cityNameList: [],
                     areaName: '',
-                    storeDetail: [],
+                    areaData: [],
                     activeStore: '',
                     enterStoreName: '',
                     enterStoreNum: '',
-                    currentNumByPagination: 1,
+                    currentNumByPagination: 0,
                     map: null,
                     myModal: null,
                     callApi: false,
                     localAPI: true,
-                    methodBox: ""
                 }
             },
             mixins: [methods],
@@ -318,6 +312,7 @@
                             }
 
                         })
+
                     } else {
                         // 非localAPI時，會是選擇完鄉鎮之後才呼叫
                         this.getRemoteStoreData().then(() => {
@@ -336,51 +331,22 @@
                             })
                         })
                     }
-                    this.$nextTick(() => {
-                        const inputArea = this.$refs.inputArea
-                        const rect = inputArea.getBoundingClientRect(); // 獲取元素的位置和尺寸
-                        let yOffset = 0// 計算垂直距離以使 inputArea 出現在瀏覽器的最下方\
-                        let objSize = rect.height + rect.top;
-
-                        if (objSize + window.pageYOffset >= window.innerHeight) {
-                            yOffset = Math.abs(window.innerHeight - objSize - window.pageYOffset);
-                        } else {
-                            yOffset = window.innerHeight - objSize - window.pageYOffset
-                        }
-
-                        window.scrollTo({
-                            top: yOffset,
-                            behavior: 'smooth'
-                        });
-                    })
-
+                    setTimeout(() => {
+                        this.moveStoreChose()
+                    }, 0)
                     this.callApi = false
                 },
-                getCurrentNum(param) {
-                    switch (param[0]) {
-                        case "1":
-                            if (this.currentNumByPagination > 1) {
-                                this.currentNumByPagination -= 1
-                            }
-                            break;
-                        case "2": this.currentNumByPagination = param[1]; break;
-                        case "3":
-                            if (this.currentNumByPagination < this.pagination) {
-                                this.currentNumByPagination += 1
-                            }
-                            break;
-                        case "4":
-                            this.currentNumByPagination = param[1]
-                            break;
-                        case "5":
-                            this.currentNumByPagination = param[1]
-                            break;
-                    }
-
+                getCurrentNum(currentNum) {
+                    this.currentNumByPagination = currentNum
+                },
+                updateData(data) {
+                    // console.log('updage',data)
+                    this.storeDetailByShow = data
                 },
                 //輸入框查詢
                 searchStore(key, param) {
                     let self = this
+
                     const myModal = new bootstrap.Modal('#lightBox', {
                         keyboard: false
                     })
@@ -397,8 +363,6 @@
                             let storeArr = this.storeData[columns[i]].stores
                             for (let j = 0; j < storeArr.length; j++) {
                                 storeArr[j][key] += ''//強制轉成字串
-                                console.log(param)
-
 
                                 if (storeArr[j][key].includes(param)) {
                                     let item = storeArr[j]
@@ -434,6 +398,30 @@
                             }
                         })
                     }
+
+                    setTimeout(() => {
+                        this.moveStoreChose()
+                    }, 0)
+
+                },
+                moveStoreChose() {
+                    this.$nextTick(() => {
+                        const inputArea = this.$refs.inputArea
+                        const rect = inputArea.getBoundingClientRect(); // 獲取元素的位置和尺寸
+                        let yOffset = 0// 計算垂直距離以使 inputArea 出現在瀏覽器的最下方\
+                        let objSize = rect.height + rect.top;
+
+                        if (objSize + window.pageYOffset >= window.innerHeight) {
+                            yOffset = Math.abs(window.innerHeight - objSize - window.pageYOffset);
+                        } else {
+                            yOffset = window.innerHeight - objSize - window.pageYOffset
+                        }
+
+                        window.scrollTo({
+                            top: yOffset,
+                            behavior: 'smooth'
+                        });
+                    })
                 },
                 convertCity(cityName) {
                     let egName = this.cityNameList.find(item => item.cityName == cityName).engName
@@ -461,30 +449,14 @@
                     }
                     return ""
                 },
-                // 計算總共頁碼
-                pagination() {
-                    if (this.storeDetail.length > 72) {
-                        return Math.ceil(this.storeDetail.length / 72)
-                    }
-                    return 1
-                },
-                storeDetailByShow() {
-                    let newData = []
-                    if (this.storeDetail.length > 72) {
-                        for (let i = 0; i < this.storeDetail.length; i++) {
-                            if (i >= 72 * (this.currentNumByPagination - 1) && i < 72 * (this.currentNumByPagination - 1) + 72) {
-                                newData.push(this.storeDetail[i])
-                            }
-                        }
-                        return newData
-                    }
-
-                    return this.storeDetail
-                }
             },
             watch: {
                 storeDetail() {
-                    this.currentNumByPagination = 1
+                    this.currentNumByPagination = 0
+
+                    this.$nextTick(() => {
+                        this.currentNumByPagination = 1
+                    })
                 }
             },
             mounted() {

@@ -230,7 +230,7 @@ img {
     }
 
     .phone {
-        display: flex;
+        display: block;
 
     }
 
