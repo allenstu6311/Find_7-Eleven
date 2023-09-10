@@ -74,7 +74,17 @@ img {
 }
 
 /* 下拉選單 */
-.input_select {}
+.inputArea:has(.input_select){
+    min-height: 60vh;
+    height: 100%;
+}
+.input_select {
+    height: 100%;
+}
+
+.input_select .btn_group {
+    height: 100%;
+}
 
 .input_select button {
     width: 28%;

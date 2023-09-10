@@ -1,11 +1,6 @@
 //台灣
 const taiwanElement = {
-    props: {
 
-    },
-    data: () => {
-
-    },
     methods: {
         callPath(path) {
             this.$emit('updateCity', path)
@@ -20,12 +15,11 @@ const taiwanElement = {
     template: `<svg id="cf503461-00bd-459a-aeb5-062ebc913211" data-name="圖層 1"   transform="scale(1.1)"   xmlns="http://www.w3.org/2000/svg" viewBox="0 0 595.28 841.89"><defs></defs><title></title>
     
     <g id="13520621-f1ed-4c7b-8b5d-1a169d9bdsadsa"  data-name="penghu_country"   
-    
     fill="#9932cc" 
     stroke="#fff" 
     stroke-width="1"
-    transform="scale(2)" 
-    transform-origin="100 400"
+    transform="scale(3)" 
+    transform-origin="90 350"
     data-bs-toggle="tooltip" 
     data-bs-placement="top"
     class="custom-tooltip"
@@ -252,10 +246,11 @@ const taiwanElement = {
     @click="callPath('嘉義市')"/>
     
     <g id="f292dbb8-1f08-451f-af4d-83b2a6953aa2" data-name="kinmen_country"   
-    
+    transform-origin="100 100" 
     fill="#ff1493"  
     stroke="#fff" 
-    stroke-width="1" 
+    stroke-width="1"
+    transform="scale(2)"  
     data-bs-toggle="tooltip" 
     data-bs-placement="top"
     class="custom-tooltip"
@@ -269,11 +264,12 @@ const taiwanElement = {
     </g>
 
     
-    <g id="13520621-f1ed-4c7b-8b5d-1a169d9bf935"   data-name="matsu"   transform-origin="50 100" 
+    <g id="13520621-f1ed-4c7b-8b5d-1a169d9bf935"   data-name="matsu"
+    transform-origin="50 50" 
     fill="#98fb98"  
     stroke="#fff" 
     stroke-width="1"
-    transform="scale(2)"
+    transform="scale(3)"
     data-bs-toggle="tooltip" 
     data-bs-placement="top"
     class="custom-tooltip"

@@ -1,14 +1,34 @@
 const pagenation = {
     props: {
-        data: Array,
-        showRange: Number,
-        currentNum: Number,
-        startPage: Number,
-        pageNeighborhood: Number,
-        pageCount: Boolean,
+        data: {
+            type: Array,
+            default: []
+        },
+        showRange: {
+            type: Number,
+            default: 30
+        },
+        //開始時要呈現多少頁碼
+        startPage: {
+            type: Number,
+            default: 7,
+        },
+        pageNeighborhood: {
+            type: Number,
+            default: 1
+        },
+        pageCount: {
+            type: Boolean,
+            default: true
+        },
         className: String,
     },
-
+    data() {
+        return {
+            currentNum: 1,
+            startPageResult: 0,
+        }
+    },
     computed: {
         //計算總共頁碼
         pagenationNum() {
@@ -34,26 +54,19 @@ const pagenation = {
         //判斷當下頁碼回傳範圍資料到父層
         currentNum: {
             handler(newVal) {
-                let newData = []
-                let data = this.$props.data
-                let ranage = this.$props.showRange
-
-                if (data && data.length) {
-                    if (data.length > ranage) {
-                        for (let i = 0; i < data.length; i++) {
-                            if (i >= ranage * (newVal - 1) && i < ranage * (newVal - 1) + ranage) {
-                                newData.push(data[i])
-                            }
-                        }
-                        this.$emit("updateData", newData)
-                    } else {
-                        this.$emit("updateData", data)
-                    }
-                }else{
-                    this.$emit("updateData", [])
-                }
-            },    
-        },      
+                this.updateUI()
+            },
+        },
+        data: {
+            handler(newVal, oldVal) {
+                this.currentNum = 1
+                this.updateUI()
+            },
+            deep: true
+        }
+    },
+    mounted() {
+        this.startPageHandle()
     },
     methods: {
         /**
@@ -63,29 +76,31 @@ const pagenation = {
          */
         changePage(param, i) {
             let length = this.pagenationNum;
-            let currentNum = this.$props.currentNum;
+            // let currentNum = this.currentNum;
 
             switch (param) {
                 case "1":
-                    if (currentNum > 1) {
-                        currentNum -= 1
-                        this.$emit("getCurrentNum", currentNum)
+                    if (this.currentNum > 1) {
+                        this.currentNum -= 1
+                        // this.$emit("getCurrentNum", currentNum)
                     }
                     break;
-                case "2": currentNum = i;
-                    this.$emit("getCurrentNum", currentNum)
+                case "2": this.currentNum = i;
+                    // this.$emit("getCurrentNum", currentNum)
                     break;
                 case "3":
-                    if (currentNum < length) {
-                        currentNum += 1
-                        this.$emit("getCurrentNum", currentNum)
+                    if (this.currentNum < length) {
+                        this.currentNum += 1
+                        // this.$emit("getCurrentNum", currentNum)
                     }
                     break;
                 case "4":
-                    this.$emit("getCurrentNum", 1)
+                    this.currentNum = 1
+                    // this.$emit("getCurrentNum", 1)
                     break;
                 case "5":
-                    this.$emit("getCurrentNum", length)
+                    this.currentNum = length
+                    // this.$emit("getCurrentNum", length)
                     break;
             }
 
@@ -96,8 +111,9 @@ const pagenation = {
          * @returns boolean
          */
         showPagination(i) {
-            let currentNum = this.$props.currentNum;
-            let range_1 = this.$props.startPage;
+            let currentNum = this.currentNum;
+            // let range_1 = this.$props.startPage;
+            let range_1 = this.startPageResult;
             let range_2 = this.$props.pageNeighborhood;
 
             //例:currentNum = 1  range_1 = 6 i<6+1  顯示 1~7
@@ -117,6 +133,39 @@ const pagenation = {
             }
             return false
         },
+        updateUI() {
+            let newData = []
+            let data = this.$props.data
+            let ranage = this.$props.showRange
+            let newVal = this.currentNum
+
+            if (data && data.length) {
+                if (data.length > ranage) {
+                    for (let i = 0; i < data.length; i++) {
+                        if (i >= ranage * (newVal - 1) && i < ranage * (newVal - 1) + ranage) {
+                            newData.push(data[i])
+                        }
+                    }
+                    this.$emit("updateData", newData)
+                } else {
+                    this.$emit("updateData", data)
+                }
+            } else {
+                this.$emit("updateData", [])
+            }
+        },
+        startPageHandle() {
+            //TODO 總頁數10頁以下不要給他設定showpage
+            this.$nextTick(() => {
+                this.startPageResult = this.$props.startPage
+                let pageNum = this.pagenationNum
+
+                if(pageNum < 5){
+                    this.startPageResult = 7;
+                    
+                }
+            })
+        }
     },
     template: `     
     <nav aria-label="..."  :class="className">
@@ -127,10 +176,10 @@ const pagenation = {
     <div class="pagination-box">
     <ul class="pagination pagination-sm">
         <li class="page-item"><span class="page-link" @click="changePage('1')">Prev</span></li>
-        <li class="page-item"><span class="page-link" v-show="currentNum>=startPage"
+        <li class="page-item"><span class="page-link" v-show="!showPagination(1)"
                 @click="changePage('4')">1</span></li>
 
-        <li class="page-item"><span class="page-link" v-show="currentNum>=startPage">...</span></li>
+        <li class="page-item"><span class="page-link" v-show="!showPagination(1)">...</span></li>
 
         <li class="page-item" aria-current="page" v-for="(i,index) in pagenationNum"
             :class="{activePage:currentNum==i}">
@@ -138,8 +187,9 @@ const pagenation = {
                 v-show="showPagination(i)">{{i}}</span>
         </li>
         <li class="page-item"><span class="page-link"
-                v-show="pagenationNum-currentNum>pageNeighborhood">...</span></li>
-        <li class="page-item"><span class="page-link" v-show="pagenationNum-currentNum>pageNeighborhood"
+                v-show="pagenationNum-currentNum>pageNeighborhood && !showPagination(pagenationNum)">...</span></li>
+
+        <li class="page-item"><span class="page-link" v-show="pagenationNum-currentNum>pageNeighborhood && !showPagination(pagenationNum)"
                 @click="changePage('5')">{{pagenationNum}}</span></li>
 
         <li class="page-item"><span class="page-link" @click="changePage('3')">Next</span></li>
