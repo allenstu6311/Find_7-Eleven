@@ -237,31 +237,11 @@ img {
     display: none;
 }
 
-@media screen and (max-width:768px) {
-    .computer {
-        display: none;
-    }
-
-    .phone {
-        display: block;
-
-    }
-
-    .store_point {
-        padding-left: calc((100% - 88%) / 2);
-    }
-
-    .no_store {
-        font-size: 30px;
-    }
-}
-
 /* 返回按鈕*/
 .go-back {
     position: absolute;
     top: 93%;
     right: calc((100% - 95%) / 2);
-    ;
     /* bottom: -75%; */
     display: inline-block;
     border-radius: 50px;
@@ -303,4 +283,25 @@ img {
         opacity: 1;
         transform: translateY(-10px);
     }
+}
+
+@media screen and (max-width:768px) {
+    .computer {
+        display: none;
+    }
+
+    .phone {
+        display: block;
+
+    }
+
+    .store_point {
+        padding-left: calc((100% - 88%) / 2);
+    }
+
+    .no_store {
+        font-size: 30px;
+    }
+
+  
 }

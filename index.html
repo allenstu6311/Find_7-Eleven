@@ -9,10 +9,12 @@
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    <link rel="stylesheet" href="./style.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
         integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="./style2.css">
+    <link rel="stylesheet" href="./taiwan.css">
 </head>
 
 <body>
@@ -49,27 +51,37 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <!-- 選擇縣市 -->
-                <div class="col-md-6 mb-2 mb-md-0 input_select">
-                    <label for="">縣市:</label>
-                    <select class="form-select" aria-label="Default select example" v-model="cityName"
-                        @change="changeCity">
-                        <option value="">請選擇</option>
-                        <option v-for="item in cityNameList" :key="item">{{item.cityName}}</option>
-                    </select>
+            <div class="row inputArea">
+                <!-- 選擇縣市(台灣地圖) -->
+                <div class="col-md-10 mb-2 mb-md-0" style="margin: auto;">
+                    <taiwan @update-city="updateCity"></taiwan>
+                </div>
+            </div>
+            <div class="row" ref="choseArea">
+                <div class="col-md-6 input_select">
+                    <taiwan :use-spare="true" :active-area="cityName"></taiwan>
                 </div>
                 <!-- 選擇鄉鎮 -->
                 <div class="col-md-6 input_select">
-                    <label for="">鄉鎮:</label>
-                    <select class="form-select" aria-label="Default select example" v-model="areaName"
-                        @change="changeArea">
-                        <option value="">請選擇</option>
-                        <option v-for="item in areaList" :key="item">{{item.AreaName}}</option>
-                    </select>
+                    <div class="">
+                        <label for="">請選擇區域:</label>
+                    </div>
+                    <div class="btn_group chose-area" v-show="areaList.length >= 1">
+                        <button type="button" class="btn btn-secondary col-md-2"
+                            :class="{active:item.AreaName == areaName}" v-for="item in areaDataByShow"
+                            @click="changeArea(item.AreaName)">{{item.AreaName}}</button>
+                    </div>
+                    <div class="" :class="{setCenter:areaDataByShow.length<1}">
+                        <strong class="no_store" v-show="areaList.length<1">尚未選擇區域</strong>
+                    </div>
+
+                    <!-- 選擇鄉鎮分頁 -->
+                    <page-nation class-name="" v-show="areaDataByShow.length>=1" @update-data="updateDataByArea"
+                        :data="areaList" :current-num="currentNumByArea" :start-page="3" :page-neighborhood="2"
+                        :show-range="32" :page-count="true"></page-nation>
                 </div>
             </div>
-            <div class="row" ref="inputArea">
+            <div class="row inputArea" ref="choseStore">
                 <!-- 按鈕選擇區 -->
                 <label for="">請選擇門市:</label>
                 <div class="col  store_point" :class="{setCenter:storeDetailByShow.length<1}">
@@ -80,52 +92,14 @@
                     </div>
                     <strong class="no_store" v-show="storeDetailByShow.length<1">尚無門市資訊</strong>
                 </div>
-                <!-- 查詢筆數 -->
-                <div class="quantity">
-                    <span v-show="storeDetail.length>=1">符合條件的項目，共<span
-                            class="number">{{storeDetail.length}}</span>筆</span>
-                </div>
-                <!-- 分頁(電腦版) -->
-                <nav aria-label="..." v-show="storeDetailByShow.length>=1" class="pagination-box computer">
-                    <ul class="pagination pagination-sm">
-                        <li class="page-item"><span class="page-link" @click="changePage('1')">Prev</span></li>
-                        <li class="page-item"><span class="page-link" v-show="currentNumByPagination>6"
-                                @click="currentNumByPagination = 1">1</span></li>
-                        <li class="page-item"><span class="page-link" v-show="currentNumByPagination>6">...</span></li>
-                        <li class="page-item" aria-current="page" v-for="(i,index) in pagination"
-                            :class="{activePage:currentNumByPagination==i}">
-                            <span class="page-link" @click="changePage('2',i)"
-                                v-show="showPagination(i,6,4)">{{i}}</span>
-                        </li>
-                        <li class="page-item"><span class="page-link"
-                                v-show="pagination-currentNumByPagination>5">...</span></li>
-                        <li class="page-item"><span class="page-link" v-show="pagination-currentNumByPagination>5"
-                                @click="currentNumByPagination = pagination">{{pagination}}</span></li>
-                        <li class="page-item"><span class="page-link" @click="changePage('3')">Next</span></li>
-                    </ul>
-                </nav>
-                <!-- 分頁(手機版) -->
-                <nav aria-label="..." v-show="storeDetailByShow.length>=1" class="pagination-box phone">
-                    <ul class="pagination pagination-sm">
-                        <li class="page-item"><span class="page-link" @click="changePage('1')">Prev</span></li>
-                        <li class="page-item"><span class="page-link" v-show="currentNumByPagination>3"
-                                @click="currentNumByPagination = 1">1</span></li>
-                        <li class="page-item"><span class="page-link" v-show="currentNumByPagination>3">...</span></li>
-                        <li class="page-item" aria-current="page" v-for="(i,index) in pagination"
-                            :class="{activePage:currentNumByPagination==i}">
-                            <span class="page-link" @click="changePage('2',i)"
-                                v-show="showPagination(i,3,2)">{{i}}</span>
-                        </li>
-                        <li class="page-item"><span class="page-link"
-                                v-show="pagination-currentNumByPagination>5">...</span></li>
-                        <li class="page-item"><span class="page-link" v-show="pagination-currentNumByPagination>2"
-                                @click="currentNumByPagination = pagination">{{pagination}}</span></li>
-                        <li class="page-item"><span class="page-link" @click="changePage('3')">Next</span></li>
-                    </ul>
-                </nav>
+                <!-- 門市分頁-->
+                <page-nation v-show="storeDetail.length>=1" @update-data="updateDataByStore" :data="storeDetail"
+                    :current-num="currentNumByStore" :start-page="pagenationParamByStore.startPage"
+                    :page-neighborhood="pagenationParamByStore.pageNeighborhood"
+                    :show-range="pagenationParamByStore.showRange" :page-count="true"></page-nation>
             </div>
             <!-- 門市資訊 -->
-            <div class="row">
+            <div class="row" ref="mapRow">
                 <!-- 地圖 -->
                 <div class="col-md-6 mb-2 mb-md-0">
                     <div id="map" ref="map"></div>
@@ -196,37 +170,60 @@
                 </div>
             </div>
         </div>
+        <!-- 向上返回的按鈕 -->
+        <div class="go-back" ref="goTop">
+            <button type="button" class="btn btn-danger" @click="goTop">
+                <i class="fa-solid fa-angles-up arrow"></i>
+                TOP</button>
+        </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
         crossorigin="anonymous"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://unpkg.com/vue@next"></script>
+    <script src="./component/taiwan.js"></script>
+    <script src="./component/pageNation.js"></script>
+    <script src="./util.js"></script>
+
     <script>
-        Vue.createApp({
+
+        const app = Vue.createApp({
             data() {
                 return {
-                    areaData: [],
-                    cityNameList: [],
                     storeData: [],
-                    storeList: [],
+                    storeDetailByShow: [],
+                    storeDetail: [],
                     storeInfo: {},
                     cityName: '',
+                    cityNameList: [],
                     areaName: '',
-                    storeDetail: [],
-                    activeCity: '',
+                    areaData: [],
+                    areaDataByShow: [],
                     activeStore: '',
                     enterStoreName: '',
                     enterStoreNum: '',
-                    currentNumByPagination: 1,
+                    currentNumByStore: 1,
+                    currentNumByArea: 1,
                     map: null,
                     myModal: null,
                     callApi: false,
-                    localAPI: true
+                    localAPI: true,
+                    pagenationParamByStore: {
+                        showRange: 0,
+                        startPage: 0,
+                        pageNeighborhood: 0,
+                        pageCount: 0
+                    },
+                    svgHTML: ''
                 }
             },
+            mixins: [methods],
             methods: {
                 callBackendAPI(url, callBack) {
                     this.callApi = true
@@ -238,11 +235,16 @@
                             }
                             this.callApi = false
                         })
+                        .catch(err => {
+                            console.log('err', err)
+                            this.callApi = false
+                        })
                 },
                 getAreaData() {
                     let self = this
-                    this.callBackendAPI('https://run.mocky.io/v3/e4bc9909-e3df-44d2-b76b-b4696d66d93a', function (json) {
+                    this.callBackendAPI('./Backend/cityName.json', function (json) {
                         self.areaData = json
+
                         self.cityNameList = self.areaData.map(item => {
                             return {
                                 cityName: item.CityName,
@@ -285,9 +287,9 @@
                     this.marker.bindPopup("歡迎使用!").openPopup();
                 },
                 setMap(item) {
-                    // 滚动到到地圖
-                    const mapElement = this.$refs.map;
-                    mapElement.scrollIntoView();
+                    setTimeout(() => {
+                        this.moveStoreChose("mapRow")
+                    }, 0)
 
                     this.map.removeLayer(this.marker);
                     this.marker = L.marker([item.y, item.x]).addTo(this.map);
@@ -298,22 +300,21 @@
                     this.map.panTo([item.y, item.x]);//讓marker保持置中
                     this.storeInfo = item//更新門市資訊
                 },
-                // 縣市下拉選單變更(取得activeCity)
-                changeCity() {
-                    let newList = this.cityNameList.filter(item => item.cityName == this.cityName)
-                    if (newList && newList.length) {
-                        let engNameSplit = newList[0].engName.split(' ')
-
-                        if (!engNameSplit || !engNameSplit.length) return
-                        this.activeCity = engNameSplit[0]
-                    }
+                updateCity(path) {
+                    this.cityName = path
                     this.activeStore = ""
+
+                    setTimeout(() => {
+                        this.moveStoreChose('choseArea')
+                    }, 0)
                 },
                 // 鄉鎮下拉選單變更(選擇完後直接進行篩選)
-                changeArea() {
+                changeArea(path) {
                     if (!this.activeCity) return
+                    this.callApi = true
                     this.storeDetail = []
                     this.activeStore = ''
+                    this.areaName = path
 
                     if (this.localAPI) {
                         let storeList = this.storeData[this.activeCity].stores
@@ -334,6 +335,7 @@
                             }
 
                         })
+
                     } else {
                         // 非localAPI時，會是選擇完鄉鎮之後才呼叫
                         this.getRemoteStoreData().then(() => {
@@ -352,49 +354,21 @@
                             })
                         })
                     }
-
+                    setTimeout(() => {
+                        this.moveStoreChose('choseStore')
+                    }, 0)
+                    this.callApi = false
                 },
-                //切換頁面
-                changePage(param, i) {
-                    //回到頁碼最上面
-                    const inputArea = this.$refs.inputArea
-                    inputArea.scrollIntoView();
-
-                    switch (param) {
-                        case "1":
-                            if (this.currentNumByPagination > 1) {
-                                this.currentNumByPagination -= 1
-                            }
-                            break;
-                        case "2": this.currentNumByPagination = i; break;
-                        case "3":
-                            if (this.currentNumByPagination < this.pagination) {
-                                this.currentNumByPagination += 1
-                            }
-                            break;
-                    }
+                updateDataByStore(data) {
+                    this.storeDetailByShow = data
                 },
-                // 判斷要顯示的頁碼
-                showPagination(i, num1, num2) {
-
-                    if (this.currentNumByPagination <= num1 && i <= num1 + 1) {
-                        return true
-
-                    } else if (this.currentNumByPagination > num1) {
-
-                        if (i >= this.currentNumByPagination - num2 && i <= this.currentNumByPagination) {
-                            return true
-
-                        } else if (i < this.currentNumByPagination + num2 && i >= this.currentNumByPagination) {
-                            return true
-                        }
-                    }
-                    return false
-
+                updateDataByArea(data) {
+                    this.areaDataByShow = data
                 },
                 //輸入框查詢
                 searchStore(key, param) {
                     let self = this
+
                     const myModal = new bootstrap.Modal('#lightBox', {
                         keyboard: false
                     })
@@ -411,8 +385,6 @@
                             let storeArr = this.storeData[columns[i]].stores
                             for (let j = 0; j < storeArr.length; j++) {
                                 storeArr[j][key] += ''//強制轉成字串
-                                console.log(param)
-
 
                                 if (storeArr[j][key].includes(param)) {
                                     let item = storeArr[j]
@@ -448,6 +420,29 @@
                             }
                         })
                     }
+                    setTimeout(() => {
+                        this.moveStoreChose("choseStore")
+                    }, 0)
+
+                },
+                moveStoreChose(target) {
+                    this.$nextTick(() => {
+                        const inputArea = this.$refs[`${target}`]
+                        const rect = inputArea.getBoundingClientRect(); // 獲取元素的位置和尺寸
+                        let yOffset = 0// 計算垂直距離以使 inputArea 出現在瀏覽器的最下方\
+                        let objSize = rect.height + rect.top;
+
+                        if (objSize + window.pageYOffset >= window.innerHeight) {
+                            yOffset = Math.abs(window.innerHeight - objSize - window.pageYOffset);
+                        } else {
+                            yOffset = window.innerHeight - objSize - window.pageYOffset
+                        }
+
+                        window.scrollTo({
+                            top: yOffset,
+                            behavior: 'smooth'
+                        });
+                    })
                 },
                 convertCity(cityName) {
                     let egName = this.cityNameList.find(item => item.cityName == cityName).engName
@@ -456,42 +451,42 @@
                     }
                     return egName
                 },
-
+                updatePageNationParam() {
+                    if (window.innerWidth < 768) {
+                        this.pagenationParamByStore = {
+                            showRange: 30,
+                            startPage: 3,
+                            pageNeighborhood: 1,
+                            pageCount: true
+                        }
+                    } else {
+                        this.pagenationParamByStore = {
+                            showRange: 72,
+                            startPage: 7,
+                            pageNeighborhood: 4,
+                            pageCount: true
+                        }
+                    }
+                }
             },
             computed: {
                 areaList() {
                     let newList = this.areaData.find(item => item.CityName == this.cityName)
                     if (newList) {
-                        this.areaName = ''
                         return newList.AreaList
                     }
                     this.areaName = ''
                     return []
                 },
-                pagination() {
-                    if (this.storeDetail.length > 72) {
-                        return Math.ceil(this.storeDetail.length / 72)
-                    }
-                    return 1
-                },
-                storeDetailByShow() {
-                    let newData = []
-                    if (this.storeDetail.length > 72) {
-                        for (let i = 0; i < this.storeDetail.length; i++) {
-                            if (i >= 72 * (this.currentNumByPagination - 1) && i < 72 * (this.currentNumByPagination - 1) + 72) {
-                                newData.push(this.storeDetail[i])
-                            }
-                        }
-                        return newData
-                    }
+                activeCity() {
+                    let newList = this.cityNameList.filter(item => item.cityName == this.cityName)
+                    let engNameSplit = newList[0].engName.split(' ')
 
-                    return this.storeDetail
-                }
-            },
-            watch: {
-                storeDetail() {
-                    this.currentNumByPagination = 1
-                }
+                    if (engNameSplit && engNameSplit.length) {
+                        return engNameSplit[0]
+                    }
+                    return ""
+                },
             },
             mounted() {
                 this.getAreaData()
@@ -500,8 +495,26 @@
                 }
 
                 this.initMap()
+                window.addEventListener("scroll", () => {
+                    const element = this.$refs.mapRow
+                    const goTop = this.$refs.goTop
+                    console.log(this.isElementInViewport(element))
+                    if (this.isElementInViewport(element)) {
+                        // 如果元素進入可視區域，則顯示它
+                        goTop.style.opacity = "1";
+                    }
+                });
+
+                this.updatePageNationParam()
+                window.addEventListener("resize", (e) => {
+                    this.updatePageNationParam()
+                })
+                
             },
-        }).mount("#app")
+        })
+        app.component("taiwan", taiwanElement);
+        app.component("pageNation", pagenation)
+        app.mount("#app")
     </script>
 
 </body>

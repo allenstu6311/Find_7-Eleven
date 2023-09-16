@@ -37,11 +37,6 @@ const taiwanElement = {
         //初始化tip
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-
-        // this.$refs.svgElement.setAttribute("fill","#000")
-
-        console.log('taiwan')
-
     },
     template: `
     <svg  v-if='!useSpare' id="main-svg" data-name="圖層 1"  transform="scale(1.1)"   xmlns="http://www.w3.org/2000/svg" viewBox="0 0 595.28 841.89"><defs></defs><title></title>
