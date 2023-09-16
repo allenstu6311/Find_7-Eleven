@@ -53,32 +53,35 @@
             </div>
             <div class="row inputArea">
                 <!-- 選擇縣市(台灣地圖) -->
-                <div class="col-md-6 mb-2 mb-md-0 ">
+                <div class="col-md-10 mb-2 mb-md-0 ">
                     <taiwan @update-city="updateCity"></taiwan>
+                </div>
+            </div>
+            <div class="row" ref="choseArea">
+                <div class="col-md-6 input_select">
+                    <taiwan :use-spare="true" :active-area="cityName"></taiwan>
                 </div>
                 <!-- 選擇鄉鎮 -->
                 <div class="col-md-6 input_select">
                     <div class="">
                         <label for="">請選擇區域:</label>
                     </div>
-                    <div class="btn_group" v-show="areaList.length >= 1">
+                    <div class="btn_group chose-area" v-show="areaList.length >= 1">
                         <button type="button" class="btn btn-secondary col-md-2"
                             :class="{active:item.AreaName == areaName}" v-for="item in areaDataByShow"
                             @click="changeArea(item.AreaName)">{{item.AreaName}}</button>
                     </div>
-                    <div class="" :style="areaDataByShow.length < 1 ? { height: '100%' ,minHeight:60+ 'vh'} : {}"
-                        :class="{setCenter:areaDataByShow.length<1}">
+                    <div class="" :class="{setCenter:areaDataByShow.length<1}">
                         <strong class="no_store" v-show="areaList.length<1">尚未選擇區域</strong>
                     </div>
 
                     <!-- 選擇鄉鎮分頁 -->
-                    <page-nation class-name="" v-show="areaDataByShow.length>=1"
-                        @update-data="updateDataByArea" :data="areaList" :current-num="currentNumByArea" :start-page="3"
-                        :page-neighborhood="2" :show-range="32" :page-count="true"></page-nation>
+                    <page-nation class-name="" v-show="areaDataByShow.length>=1" @update-data="updateDataByArea"
+                        :data="areaList" :current-num="currentNumByArea" :start-page="3" :page-neighborhood="2"
+                        :show-range="32" :page-count="true"></page-nation>
                 </div>
-
             </div>
-            <div class="row inputArea" ref="inputArea">
+            <div class="row inputArea" ref="choseStore">
                 <!-- 按鈕選擇區 -->
                 <label for="">請選擇門市:</label>
                 <div class="col  store_point" :class="{setCenter:storeDetailByShow.length<1}">
@@ -90,9 +93,10 @@
                     <strong class="no_store" v-show="storeDetailByShow.length<1">尚無門市資訊</strong>
                 </div>
                 <!-- 門市分頁-->
-                <page-nation v-show="storeDetail.length>=1" 
-                    @update-data="updateDataByStore" :data="storeDetail" :current-num="currentNumByStore"
-                    :start-page="pagenationParamByStore.startPage" :page-neighborhood="pagenationParamByStore.pageNeighborhood" :show-range="pagenationParamByStore.showRange" :page-count="true"></page-nation>
+                <page-nation v-show="storeDetail.length>=1" @update-data="updateDataByStore" :data="storeDetail"
+                    :current-num="currentNumByStore" :start-page="pagenationParamByStore.startPage"
+                    :page-neighborhood="pagenationParamByStore.pageNeighborhood"
+                    :show-range="pagenationParamByStore.showRange" :page-count="true"></page-nation>
             </div>
             <!-- 門市資訊 -->
             <div class="row">
@@ -186,6 +190,7 @@
     <script src="./component/taiwan.js"></script>
     <script src="./component/pageNation.js"></script>
     <script src="./util.js"></script>
+
     <script>
 
         const app = Vue.createApp({
@@ -214,12 +219,14 @@
                         startPage: 0,
                         pageNeighborhood: 0,
                         pageCount: 0
-                    }
+                    },
+                    svgHTML: ''
                 }
             },
             mixins: [methods],
             methods: {
                 callBackendAPI(url, callBack) {
+                    console.log(url)
                     this.callApi = true
                     return fetch(url)
                         .then(res => res.json())
@@ -229,14 +236,14 @@
                             }
                             this.callApi = false
                         })
-                        .catch(err=>{
-                            console.log('err',err)
+                        .catch(err => {
+                            console.log('err', err)
                             this.callApi = false
                         })
                 },
                 getAreaData() {
                     let self = this
-                    this.callBackendAPI('https://run.mocky.io/v3/e4bc9909-e3df-44d2-b76b-b4696d66d93a', function (json) {
+                    this.callBackendAPI('./Backend/cityName.json', function (json) {
                         self.areaData = json
 
                         self.cityNameList = self.areaData.map(item => {
@@ -280,7 +287,7 @@
                     this.marker = L.marker([x, y]).addTo(this.map);
                     this.marker.bindPopup("歡迎使用!").openPopup();
                 },
-                setMap(item) { 
+                setMap(item) {
                     // 滚动到到地圖
                     const mapElement = this.$refs.map;
                     mapElement.scrollIntoView();
@@ -297,6 +304,10 @@
                 updateCity(path) {
                     this.cityName = path
                     this.activeStore = ""
+
+                    setTimeout(() => {
+                        this.moveStoreChose('choseArea')
+                    }, 0)
                 },
                 // 鄉鎮下拉選單變更(選擇完後直接進行篩選)
                 changeArea(path) {
@@ -345,7 +356,7 @@
                         })
                     }
                     setTimeout(() => {
-                        this.moveStoreChose()
+                        this.moveStoreChose('choseStore')
                     }, 0)
                     this.callApi = false
                 },
@@ -411,13 +422,13 @@
                         })
                     }
                     setTimeout(() => {
-                        this.moveStoreChose()
+                        this.moveStoreChose("choseStore")
                     }, 0)
 
                 },
-                moveStoreChose() {
+                moveStoreChose(target) {
                     this.$nextTick(() => {
-                        const inputArea = this.$refs.inputArea
+                        const inputArea = this.$refs[`${target}`]
                         const rect = inputArea.getBoundingClientRect(); // 獲取元素的位置和尺寸
                         let yOffset = 0// 計算垂直距離以使 inputArea 出現在瀏覽器的最下方\
                         let objSize = rect.height + rect.top;
@@ -449,7 +460,7 @@
                             pageNeighborhood: 1,
                             pageCount: true
                         }
-                    }else{
+                    } else {
                         this.pagenationParamByStore = {
                             showRange: 72,
                             startPage: 7,
@@ -479,6 +490,7 @@
                 },
             },
             mounted() {
+                console.log('index')
                 this.getAreaData()
                 if (this.localAPI) {
                     this.getRemoteStoreData()
@@ -497,7 +509,7 @@
                 window.addEventListener("resize", (e) => {
                     this.updatePageNationParam()
                 })
-
+                
             },
         })
         app.component("taiwan", taiwanElement);

@@ -66,6 +66,7 @@ const pagenation = {
         }
     },
     mounted() {
+        console.log('page')
         this.startPageHandle()
     },
     methods: {

@@ -49,6 +49,7 @@ img {
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100%;
 }
 
 /* row */
@@ -79,12 +80,12 @@ img {
     height: 100%;
 }
 .input_select {
-    height: 100%;
+ 
 }
 
-.input_select .btn_group {
+/* .input_select .btn_group {
     height: 100%;
-}
+} */
 
 .input_select button {
     width: 28%;
@@ -113,7 +114,9 @@ img {
     width: 95%;
     margin: auto;
 }
-
+.chose-area{
+    min-height: 28vh;
+}
 
 .store_point button {
     width: 28%;
