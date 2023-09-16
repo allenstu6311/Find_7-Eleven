@@ -292,7 +292,7 @@ const taiwanElement = {
 
     
     <g id="13520621-f1ed-4c7b-8b5d-1a169d9bf935"   data-name="matsu"
-    transform-origin="90 100" 
+    transform-origin="50 100" 
     fill="#98fb98"  
     stroke="#fff" 
     stroke-width="1"

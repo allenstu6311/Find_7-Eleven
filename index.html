@@ -297,6 +297,7 @@
                     <img src='./7-11.png'>
                     <p style='font-weight: bold;' class='text-center'>${item.poinName}門市</p>
                     `).openPopup();
+                    this.map.setZoom(100);
                     this.map.panTo([item.y, item.x]);//讓marker保持置中
                     this.storeInfo = item//更新門市資訊
                 },
