@@ -1,6 +1,6 @@
 [
   {
-    "CityName": "台北市",
+    "CityName": "臺北市",
     "CityEngName": "Taipei City",
     "AreaList": [
       {
@@ -108,7 +108,7 @@
   },
   {
     "CityName": "新北市",
-    "CityEngName": "New Taipei City",
+    "CityEngName": "NewTaipei",
     "AreaList": [
       {
         "ZipCode": "207",
@@ -367,7 +367,7 @@
   },
   {
     "CityName": "新竹市",
-    "CityEngName": "Hsinchu City",
+    "CityEngName": "HsinchuCity",
     "AreaList": [
       {
         "ZipCode": "300",
@@ -388,7 +388,7 @@
   },
   {
     "CityName": "新竹縣",
-    "CityEngName": "Hsinchu County",
+    "CityEngName": "HsinchuCounty",
     "AreaList": [
       {
         "ZipCode": "308",
@@ -984,7 +984,7 @@
   },
   {
     "CityName": "嘉義市",
-    "CityEngName": "Chiayi City",
+    "CityEngName": "ChiayiCity",
     "AreaList": [
       {
         "ZipCode": "600",
@@ -1000,7 +1000,7 @@
   },
   {
     "CityName": "嘉義縣",
-    "CityEngName": "Chiayi County",
+    "CityEngName": "ChiayiCounty",
     "AreaList": [
       {
         "ZipCode": "602",
