@@ -191,6 +191,7 @@
     <script src="./component/pageNation.js"></script>
     <script src="./util.js"></script>
 
+
     <script>
 
         const app = Vue.createApp({
@@ -446,10 +447,12 @@
                     })
                 },
                 convertCity(cityName) {
+                    console.log("1", cityName)
                     let egName = this.cityNameList.find(item => item.cityName == cityName).engName
                     if (egName) {
                         egName = egName.split(' ')[0]
                     }
+                    console.log("2", egName)
                     return egName
                 },
                 updatePageNationParam() {
@@ -510,7 +513,7 @@
                 window.addEventListener("resize", (e) => {
                     this.updatePageNationParam()
                 })
-                
+
             },
         })
         app.component("taiwan", taiwanElement);
